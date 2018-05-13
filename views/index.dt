@@ -1,0 +1,78 @@
+doctype html
+html
+	head
+		meta(charset="utf-8")
+		meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
+		title My Website
+		link(rel="stylesheet", href="/css/style.css")
+	body
+		button(onclick="shortcut('Alt+Left')") Back
+		button(onclick="shortcut('Alt+Right')") Forward
+		button(onclick="shortcut('Ctrl+Page_Up')") Prev Tab
+		button(onclick="shortcut('Ctrl+Page_Down')") Next Tab
+		hr
+		.arrows
+			button(onclick="shortcut('Return')") Return
+			button(onclick="shortcut('Up')") &uarr;
+			button(onclick="if (!confirm('Confirm Close.')) return; shortcut('Super+Shift+Q')") Close
+			button(onclick="shortcut('Left')") &larr;
+			button(onclick="shortcut('Down')") &darr;
+			button(onclick="shortcut('Right')") &rarr;
+		hr
+		label
+			input#modsuper(type="checkbox")
+			| Super
+		label
+			input#modshift(type="checkbox")
+			| Shift
+		label
+			input#modctrl(type="checkbox")
+			| Ctrl
+		label
+			input#modalt(type="checkbox")
+			| Alt
+		hr
+		input(placeholder="Emulate Input", oninput="text(this, event)", onkeydown="key(this, event)", autocomplete="off", type="password")
+		button(onclick="shortcut('BackSpace')") &larr;
+		hr
+		button(onclick="shutdown(this)") Shutdown Computer
+		:javascript
+			function post(endpoint)
+			{
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", endpoint);
+				xhr.send();
+			}
+			function key(input, event)
+			{
+				if (event.key == "Backspace")
+					post("/key?key=BackSpace");
+				else if (event.key == "Return" || event.key == "Enter")
+					post("/key?key=Return");
+			}
+			function text(input, event)
+			{
+				post("/text?text=" + encodeURIComponent(input.value));
+				input.value = "";
+			}
+			function shortcut(shortcut)
+			{
+				if (document.getElementById("modsuper").checked && shortcut.indexOf("Super") == -1)
+					shortcut = "Super+" + shortcut;
+				if (document.getElementById("modctrl").checked && shortcut.indexOf("Ctrl") == -1)
+					shortcut = "Ctrl+" + shortcut;
+				if (document.getElementById("modshift").checked && shortcut.indexOf("Shift") == -1)
+					shortcut = "Shift+" + shortcut;
+				if (document.getElementById("modalt").checked && shortcut.indexOf("Alt") == -1)
+					shortcut = "Alt+" + shortcut;
+				post("/key?key=" + encodeURIComponent(shortcut));
+			}
+			function shutdown(btn)
+			{
+				if (confirm("Shutdown PC?"))
+				{
+					btn.disabled = true;
+					post("/shutdown");
+					window.close();
+				}
+			}
